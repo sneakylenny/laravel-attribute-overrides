@@ -19,7 +19,12 @@ class PendingSourcedAttribute
     {
         app(SourcedAttributes::class)->ensurePersisted($origin);
         $cast = app(SourcedAttributes::class)->normalizeCast($options['cast'] ?? null);
-        $autoSync = (bool) ($options['auto_sync'] ?? app(SourcedAttributes::class)->defaultAutoSync());
+        $service = app(SourcedAttributes::class);
+        $autoSync = (bool) ($options['auto_sync'] ?? $service->defaultAutoSync());
+
+        if ($autoSync) {
+            $service->markOriginClassHasAutoSync($origin::class);
+        }
 
         return $this->target->sourcedAttributes()->updateOrCreate(
             [
@@ -32,7 +37,7 @@ class PendingSourcedAttribute
                 'value' => data_get($origin, $originAttribute),
                 'cast' => $cast,
                 'auto_sync' => $autoSync,
-                'priority' => (int) ($options['priority'] ?? app(SourcedAttributes::class)->defaultPriority()),
+                'priority' => (int) ($options['priority'] ?? $service->defaultPriority()),
             ]
         );
     }

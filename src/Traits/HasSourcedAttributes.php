@@ -68,7 +68,7 @@ trait HasSourcedAttributes
             return (bool) $this->overridesDefault;
         }
 
-        return (bool) config('sourced-attributes.overrides_default', true);
+        return (bool) config('sourced-attributes.overrides.enabled', true);
     }
 
     public function syncSourcedAttribute(string $attribute): int

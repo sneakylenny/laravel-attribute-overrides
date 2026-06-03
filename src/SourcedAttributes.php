@@ -13,6 +13,11 @@ use InvalidArgumentException;
 class SourcedAttributes
 {
     /**
+     * @var array<class-string<Model>, bool>
+     */
+    protected array $originClassHasAutoSync = [];
+
+    /**
      * @var array<int, string>
      */
     protected array $builtInCastTypes = [
@@ -61,12 +66,45 @@ class SourcedAttributes
 
     public function autoSyncEnabled(): bool
     {
-        return (bool) config('sourced-attributes.auto_sync_enabled', true);
+        return (bool) config('sourced-attributes.auto_sync.enabled', true);
     }
 
     public function defaultAutoSync(): bool
     {
-        return (bool) config('sourced-attributes.auto_sync_default', false);
+        return (bool) config('sourced-attributes.auto_sync.default', false);
+    }
+
+    public function autoSyncQueued(): bool
+    {
+        return (bool) config('sourced-attributes.auto_sync.queued', false);
+    }
+
+    public function shouldSyncOriginClass(string $originClass): bool
+    {
+        if (! $this->autoSyncEnabled()) {
+            return false;
+        }
+
+        if (array_key_exists($originClass, $this->originClassHasAutoSync)) {
+            return $this->originClassHasAutoSync[$originClass];
+        }
+
+        /** @var class-string<Model> $modelClass */
+        $modelClass = $this->modelClass();
+
+        $hasAny = $modelClass::query()
+            ->where('origin_type', $originClass)
+            ->where('auto_sync', true)
+            ->exists();
+
+        $this->originClassHasAutoSync[$originClass] = $hasAny;
+
+        return $hasAny;
+    }
+
+    public function markOriginClassHasAutoSync(string $originClass): void
+    {
+        $this->originClassHasAutoSync[$originClass] = true;
     }
 
     public function ensurePersisted(Model $model): void
@@ -150,7 +188,7 @@ class SourcedAttributes
 
     public function syncFromOrigin(Model $origin): int
     {
-        if (! $origin->exists || ! $this->autoSyncEnabled()) {
+        if (! $origin->exists || ! $this->autoSyncEnabled() || ! $this->shouldSyncOriginClass($origin::class)) {
             return 0;
         }
 

@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Queue;
+use SneakyLenny\SourcedAttributes\Jobs\SyncSourcedAttributesFromOrigin;
 use SneakyLenny\SourcedAttributes\Tests\Support\Casts\UppercaseCast;
 use SneakyLenny\SourcedAttributes\Tests\Support\Models\TestPerson;
 use SneakyLenny\SourcedAttributes\Tests\Support\Models\TestPersonOverridesDisabled;
@@ -236,7 +238,7 @@ it('can configure sourced override usage default per model with a trait property
 });
 
 it('can configure sourced override usage default globally via config', function () {
-    config()->set('sourced-attributes.overrides_default', false);
+    config()->set('sourced-attributes.overrides.enabled', false);
 
     $source = TestPerson::create([
         'name' => 'source',
@@ -259,7 +261,7 @@ it('can configure sourced override usage default globally via config', function 
     expect($model->usesOverrides())->toBeTrue()
         ->and($model->name)->toBe('Sourced Name');
 
-    config()->set('sourced-attributes.overrides_default', true);
+    config()->set('sourced-attributes.overrides.enabled', true);
 });
 
 it('can eager load sourced attributes for bulk reads', function () {
@@ -354,4 +356,26 @@ it('does not auto sync sourced snapshots by default', function () {
     $source->update(['data' => ['FirstName' => 'Not Synced']]);
 
     expect($target->fresh()->name)->toBe('Sourced Name');
+});
+
+it('dispatches queued auto sync job when queue mode is enabled', function () {
+    Queue::fake();
+    config()->set('sourced-attributes.auto_sync.queued', true);
+
+    $source = TestPerson::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->from($source, 'data.FirstName', ['auto_sync' => true]);
+
+    $source->update(['data' => ['FirstName' => 'Queued Sync']]);
+
+    Queue::assertPushed(SyncSourcedAttributesFromOrigin::class);
+
+    config()->set('sourced-attributes.auto_sync.queued', false);
 });

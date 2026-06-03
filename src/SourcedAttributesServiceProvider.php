@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Event;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use SneakyLenny\SourcedAttributes\Commands\SourcedAttributesCommand;
+use SneakyLenny\SourcedAttributes\Jobs\SyncSourcedAttributesFromOrigin;
+use SneakyLenny\SourcedAttributes\Models\SourcedAttribute;
 
 class SourcedAttributesServiceProvider extends PackageServiceProvider
 {
@@ -35,11 +37,23 @@ class SourcedAttributesServiceProvider extends PackageServiceProvider
         Event::listen('eloquent.updated: *', function (string $eventName, array $payload): void {
             $model = $payload[0] ?? null;
 
-            if (! $model instanceof Model) {
+            if (! $model instanceof Model || $model instanceof SourcedAttribute) {
                 return;
             }
 
-            app(SourcedAttributes::class)->syncFromOrigin($model);
+            $service = app(SourcedAttributes::class);
+
+            if (! $service->shouldSyncOriginClass($model::class)) {
+                return;
+            }
+
+            if ($service->autoSyncQueued()) {
+                SyncSourcedAttributesFromOrigin::dispatch($model);
+
+                return;
+            }
+
+            $service->syncFromOrigin($model);
         });
     }
 }
