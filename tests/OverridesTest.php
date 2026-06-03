@@ -81,7 +81,7 @@ it('can resolve sourced attributes that do not exist on the model', function () 
         'name' => 'Original Name',
     ]);
 
-    $target->sourceAttribute('label')->value('TEST');
+    $target->sourceAttribute('label')->as('TEST');
 
     expect($target->fresh()->label)->toBe('TEST');
 });
@@ -91,7 +91,7 @@ it('does not resolve non-model sourced attributes when overrides are disabled', 
         'name' => 'Original Name',
     ]);
 
-    $target->sourceAttribute('label')->value('TEST');
+    $target->sourceAttribute('label')->as('TEST');
 
     $model = $target->fresh()->withoutOverrides();
 

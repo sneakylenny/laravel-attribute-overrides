@@ -42,7 +42,7 @@ class PendingSourcedAttribute
         );
     }
 
-    public function value(mixed $value, array $options = []): SourcedAttribute
+    public function as(mixed $value, array $options = []): SourcedAttribute
     {
         $cast = app(SourcedAttributes::class)->normalizeCast($options['cast'] ?? null);
 

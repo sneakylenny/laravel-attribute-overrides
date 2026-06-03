@@ -8,7 +8,7 @@ it('applies a built in cast to the sourced value', function () {
         'name' => 'Original Name',
     ]);
 
-    $target->sourceAttribute('name')->value('42', ['cast' => 'integer']);
+    $target->sourceAttribute('name')->as('42', ['cast' => 'integer']);
 
     expect($target->fresh()->name)->toBeInt()->toBe(42);
 });
@@ -18,7 +18,7 @@ it('applies a custom cast class to the sourced value', function () {
         'name' => 'Original Name',
     ]);
 
-    $target->sourceAttribute('name')->value('mixed Case', ['cast' => UppercaseCast::class]);
+    $target->sourceAttribute('name')->as('mixed Case', ['cast' => UppercaseCast::class]);
 
     expect($target->fresh()->name)->toBe('MIXED CASE');
 });
@@ -28,6 +28,6 @@ it('rejects non cast classes passed as a sourced cast', function () {
         'name' => 'Original Name',
     ]);
 
-    expect(fn() => $target->sourceAttribute('name')->value('X', ['cast' => \stdClass::class]))
+    expect(fn() => $target->sourceAttribute('name')->as('X', ['cast' => \stdClass::class]))
         ->toThrow(\InvalidArgumentException::class, 'is not a valid Laravel cast');
 });

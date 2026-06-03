@@ -23,7 +23,7 @@ it('overrides an attribute with a direct literal value', function () {
         'name' => 'Original Name',
     ]);
 
-    $target->sourceAttribute('name')->value('Controller Value', ['priority' => 10]);
+    $target->sourceAttribute('name')->as('Controller Value', ['priority' => 10]);
 
     expect($target->fresh()->name)->toBe('Controller Value');
 });
@@ -62,8 +62,8 @@ it('updates existing value source record when recalled', function () {
         'name' => 'Original Name',
     ]);
 
-    $target->sourceAttribute('name')->value('First Value', ['priority' => 1]);
-    $target->sourceAttribute('name')->value('Second Value', ['priority' => 10]);
+    $target->sourceAttribute('name')->as('First Value', ['priority' => 1]);
+    $target->sourceAttribute('name')->as('Second Value', ['priority' => 10]);
 
     $record = $target->sourcedAttributes()->where('sourceable_attribute', 'name')->first();
 
@@ -98,8 +98,8 @@ it('can filter by effective value with whereEffective', function () {
     $overrideMatch = TestPerson::create(['name' => 'Beta']);
     $noMatch = TestPerson::create(['name' => 'Gamma']);
 
-    $overrideMatch->sourceAttribute('name')->value('Alpha', ['priority' => 10]);
-    $noMatch->sourceAttribute('name')->value('Zeta', ['priority' => 10]);
+    $overrideMatch->sourceAttribute('name')->as('Alpha', ['priority' => 10]);
+    $noMatch->sourceAttribute('name')->as('Zeta', ['priority' => 10]);
 
     $ids = TestPerson::query()
         ->whereEffective('name', 'Alpha')
@@ -137,7 +137,7 @@ it('can skip effective source subquery when disabled for query filtering', funct
     $baseMatch = TestPerson::create(['name' => 'Alpha']);
     $overrideOnly = TestPerson::create(['name' => 'Beta']);
 
-    $overrideOnly->sourceAttribute('name')->value('Alpha', ['priority' => 10]);
+    $overrideOnly->sourceAttribute('name')->as('Alpha', ['priority' => 10]);
 
     $ids = TestPerson::query()
         ->whereEffectiveWhen(false, 'name', 'Alpha')
