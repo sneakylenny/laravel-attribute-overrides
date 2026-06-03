@@ -2,7 +2,6 @@
 
 namespace SneakyLenny\SourcedAttributes\Tests;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Schema;
 use Orchestra\Testbench\TestCase as Orchestra;
 use SneakyLenny\SourcedAttributes\SourcedAttributesServiceProvider;
@@ -14,10 +13,6 @@ class TestCase extends Orchestra
         parent::setUp();
 
         $this->setUpDatabase();
-
-        Factory::guessFactoryNamesUsing(
-            fn(string $modelName) => 'SneakyLenny\\SourcedAttributes\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
-        );
     }
 
     protected function getPackageProviders($app)

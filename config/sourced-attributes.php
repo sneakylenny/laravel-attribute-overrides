@@ -16,7 +16,7 @@ return [
 
     // Auto-sync behavior for origin-backed sourced records.
     'auto_sync' => [
-        // Global kill switch for auto-sync listeners.
+        // Global toggle for auto-sync listeners.
         'enabled' => true,
 
         // Default per-record auto_sync value when calling from(...) without explicit option.

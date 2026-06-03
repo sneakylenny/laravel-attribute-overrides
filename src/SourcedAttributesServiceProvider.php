@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use SneakyLenny\SourcedAttributes\Commands\SourcedAttributesCommand;
 use SneakyLenny\SourcedAttributes\Jobs\SyncSourcedAttributesFromOrigin;
 use SneakyLenny\SourcedAttributes\Models\SourcedAttribute;
 
@@ -22,9 +21,7 @@ class SourcedAttributesServiceProvider extends PackageServiceProvider
         $package
             ->name('laravel-sourced-attributes')
             ->hasConfigFile()
-            ->hasViews()
-            ->hasMigration('create_sourced_attributes_table')
-            ->hasCommand(SourcedAttributesCommand::class);
+            ->hasMigration('create_sourced_attributes_table');
     }
 
     public function packageRegistered(): void
