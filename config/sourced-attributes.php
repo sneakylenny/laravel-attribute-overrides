@@ -7,4 +7,6 @@ return [
     'model' => SneakyLenny\SourcedAttributes\Models\SourcedAttribute::class,
 
     'default_priority' => 0,
+
+    'overrides_default' => true,
 ];

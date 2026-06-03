@@ -3,6 +3,7 @@
 use Illuminate\Support\Carbon;
 use SneakyLenny\SourcedAttributes\Tests\Support\Casts\UppercaseCast;
 use SneakyLenny\SourcedAttributes\Tests\Support\Models\TestPerson;
+use SneakyLenny\SourcedAttributes\Tests\Support\Models\TestPersonOverridesDisabled;
 
 it('overrides an attribute from a model source path', function () {
     $source = TestPerson::create([
@@ -186,4 +187,77 @@ it('rejects non cast classes passed as a sourced cast', function () {
 
     expect(fn() => $target->sourceAttribute('name')->value('X', ['cast' => \stdClass::class]))
         ->toThrow(\InvalidArgumentException::class, 'is not a valid Laravel cast');
+});
+
+it('can toggle sourced attribute overrides on a model instance', function () {
+    $source = TestPerson::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->from($source, 'data.FirstName');
+
+    $model = $target->fresh();
+
+    expect($model->name)->toBe('Sourced Name');
+
+    $model->withoutOverrides();
+    expect($model->name)->toBe('Original Name');
+
+    $model->withOverrides();
+    expect($model->name)->toBe('Sourced Name');
+});
+
+it('can configure sourced override usage default per model with a trait property', function () {
+    $source = TestPersonOverridesDisabled::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target = TestPersonOverridesDisabled::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->from($source, 'data.FirstName');
+
+    $model = $target->fresh();
+
+    expect($model->usesOverrides())->toBeFalse()
+        ->and($model->name)->toBe('Original Name');
+
+    $model->withOverrides();
+
+    expect($model->usesOverrides())->toBeTrue()
+        ->and($model->name)->toBe('Sourced Name');
+});
+
+it('can configure sourced override usage default globally via config', function () {
+    config()->set('sourced-attributes.overrides_default', false);
+
+    $source = TestPerson::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->from($source, 'data.FirstName');
+
+    $model = $target->fresh();
+
+    expect($model->usesOverrides())->toBeFalse()
+        ->and($model->name)->toBe('Original Name');
+
+    $model->withOverrides();
+
+    expect($model->usesOverrides())->toBeTrue()
+        ->and($model->name)->toBe('Sourced Name');
+
+    config()->set('sourced-attributes.overrides_default', true);
 });

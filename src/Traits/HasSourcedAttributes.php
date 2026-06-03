@@ -10,6 +10,8 @@ use SneakyLenny\SourcedAttributes\SourcedAttributes;
 
 trait HasSourcedAttributes
 {
+    protected ?bool $overridesState = null;
+
     public function sourcedAttributes(): MorphMany
     {
         return $this->morphMany(app(SourcedAttributes::class)->modelClass(), 'sourceable');
@@ -18,6 +20,40 @@ trait HasSourcedAttributes
     public function sourceAttribute(string $attribute): PendingSourcedAttribute
     {
         return new PendingSourcedAttribute($this, $attribute);
+    }
+
+    public function withOverrides(): static
+    {
+        $this->overridesState = true;
+
+        return $this;
+    }
+
+    public function withoutOverrides(): static
+    {
+        $this->overridesState = false;
+
+        return $this;
+    }
+
+    public function setOverrides(bool $enabled): static
+    {
+        $this->overridesState = $enabled;
+
+        return $this;
+    }
+
+    public function usesOverrides(): bool
+    {
+        if ($this->overridesState !== null) {
+            return $this->overridesState;
+        }
+
+        if (property_exists($this, 'overridesDefault')) {
+            return (bool) $this->overridesDefault;
+        }
+
+        return (bool) config('sourced-attributes.overrides_default', true);
     }
 
     public function syncSourcedAttribute(string $attribute): int
@@ -61,6 +97,10 @@ trait HasSourcedAttributes
     public function getAttributeValue($key): mixed
     {
         $value = parent::getAttributeValue($key);
+
+        if (! $this->usesOverrides()) {
+            return $value;
+        }
 
         if (! $this->shouldResolveSourcedAttribute((string) $key)) {
             return $value;
