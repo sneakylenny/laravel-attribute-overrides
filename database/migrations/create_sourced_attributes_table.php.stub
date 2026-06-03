@@ -8,12 +8,27 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('laravel_sourced_attributes_table', function (Blueprint $table) {
+        Schema::create(config('sourced-attributes.table', 'sourced_attributes'), function (Blueprint $table) {
             $table->id();
 
-            // add fields
+            $table->morphs('sourceable');
+            $table->string('sourceable_attribute');
+
+            $table->nullableMorphs('origin');
+            $table->string('origin_attribute')->nullable();
+
+            $table->text('value')->nullable();
+            $table->integer('priority')->default(0);
 
             $table->timestamps();
+
+            $table->index(['sourceable_type', 'sourceable_id', 'sourceable_attribute'], 'src_attr_lookup_idx');
+            $table->index(['sourceable_type', 'sourceable_id', 'sourceable_attribute', 'priority'], 'src_attr_priority_idx');
         });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists(config('sourced-attributes.table', 'sourced_attributes'));
     }
 };

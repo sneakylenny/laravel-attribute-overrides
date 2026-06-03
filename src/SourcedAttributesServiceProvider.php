@@ -19,7 +19,12 @@ class SourcedAttributesServiceProvider extends PackageServiceProvider
             ->name('laravel-sourced-attributes')
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_laravel_sourced_attributes_table')
+            ->hasMigration('create_sourced_attributes_table')
             ->hasCommand(SourcedAttributesCommand::class);
+    }
+
+    public function packageRegistered(): void
+    {
+        $this->app->singleton(SourcedAttributes::class, fn(): SourcedAttributes => new SourcedAttributes);
     }
 }
