@@ -299,3 +299,25 @@ it('can skip effective source subquery when disabled for query filtering', funct
 
     expect($ids)->toBe([$baseMatch->id]);
 });
+
+it('can resolve sourced attributes that do not exist on the model', function () {
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('label')->value('TEST');
+
+    expect($target->fresh()->label)->toBe('TEST');
+});
+
+it('does not resolve non-model sourced attributes when overrides are disabled', function () {
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('label')->value('TEST');
+
+    $model = $target->fresh()->withoutOverrides();
+
+    expect($model->label)->toBeNull();
+});

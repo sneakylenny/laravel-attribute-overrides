@@ -126,6 +126,38 @@ trait HasSourcedAttributes
         return $hasOverride ? $overrideValue : $value;
     }
 
+    public function getAttribute($key): mixed
+    {
+        try {
+            $value = parent::getAttribute($key);
+        } catch (\Illuminate\Database\Eloquent\MissingAttributeException $exception) {
+            if (! is_string($key) || $key === '' || ! $this->shouldResolveVirtualSourcedAttribute($key)) {
+                throw $exception;
+            }
+
+            [$hasOverride, $overrideValue] = $this->resolveSourcedAttribute($key);
+
+            if (! $hasOverride) {
+                throw $exception;
+            }
+
+            return $overrideValue;
+        }
+
+        if (
+            $value !== null
+            || ! is_string($key)
+            || $key === ''
+            || ! $this->shouldResolveVirtualSourcedAttribute($key)
+        ) {
+            return $value;
+        }
+
+        [$hasOverride, $overrideValue] = $this->resolveSourcedAttribute($key);
+
+        return $hasOverride ? $overrideValue : $value;
+    }
+
     public function scopeWhereEffective(Builder $query, string $attribute, mixed $operator, mixed $value = null): Builder
     {
         app(SourcedAttributes::class)->ensureAttributeName($attribute);
@@ -192,6 +224,23 @@ trait HasSourcedAttributes
         }
 
         if (! array_key_exists($key, $this->getAttributes())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function shouldResolveVirtualSourcedAttribute(string $key): bool
+    {
+        if (! $this->usesOverrides() || ! $this->exists) {
+            return false;
+        }
+
+        if (array_key_exists($key, $this->getAttributes())) {
+            return false;
+        }
+
+        if ($this->isRelation($key) || $this->relationLoaded($key)) {
             return false;
         }
 
