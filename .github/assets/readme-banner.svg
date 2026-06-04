@@ -1,0 +1,46 @@
+<svg width="1400" height="420" viewBox="0 0 1400 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Laravel Sourced Attributes Banner</title>
+  <desc id="desc">Gradient banner with package title and subtitle.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="120" y1="40" x2="1320" y2="380" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF7ED"/>
+      <stop offset="1" stop-color="#FFE4E6"/>
+    </linearGradient>
+
+    <linearGradient id="accent" x1="210" y1="120" x2="1200" y2="340" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F97316"/>
+      <stop offset="1" stop-color="#EF4444"/>
+    </linearGradient>
+
+    <filter id="shadow" x="0" y="0" width="1400" height="420" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#9F1239" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="1400" height="420" rx="28" fill="url(#bg)"/>
+
+  <g opacity="0.25">
+    <circle cx="130" cy="80" r="120" fill="#FDBA74"/>
+    <circle cx="1280" cy="360" r="180" fill="#FCA5A5"/>
+    <circle cx="1220" cy="70" r="70" fill="#FED7AA"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="88" y="68" width="1224" height="284" rx="22" fill="white" fill-opacity="0.86"/>
+  </g>
+
+  <rect x="88" y="68" width="10" height="284" rx="5" fill="url(#accent)"/>
+
+  <text x="138" y="178" fill="#7C2D12" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="62" font-weight="700" letter-spacing="0.2">
+    Laravel Sourced Attributes
+  </text>
+
+  <text x="138" y="238" fill="#9A3412" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="30" font-weight="500">
+    Deterministic model overrides from literals or origin records
+  </text>
+
+  <text x="138" y="292" fill="#B45309" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="24" font-weight="600">
+    Priority first • Newest timestamp wins • Cast-aware • Sync-ready
+  </text>
+</svg>
