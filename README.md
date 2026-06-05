@@ -100,13 +100,13 @@ use SneakyLenny\SourcedAttributes\Traits\HasSourcedAttributes;
 //     use HasSourcedAttributes;
 // }
 
+$user = User::create([
+	'name' => 'jhon doe',
+]);
+
 $entraUser = EntraUser::create([
 	'external_id' => 'entra-123',
 	'profile' => ['displayName' => 'Johnny Doe'],
-]);
-
-$user = User::create([
-	'name' => 'jhon doe',
 ]);
 
 // If the origin attribute has the same name, the second argument can be omitted.
