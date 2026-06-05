@@ -112,6 +112,9 @@ $user->sourceAttribute('name')->from($entraUser, 'profile.displayName');
 // Optionally apply a manual override with higher priority.
 $user->sourceAttribute('name')->as('Preferred Support Name', ['priority' => 10]);
 
+// Or use the fluent builder method.
+$user->sourceAttribute('name')->priority(10)->as('Preferred Support Name');
+
 // Read effective value (resolved override winner).
 $resolved = $user->fresh()->name; // "Preferred Support Name"
 ```

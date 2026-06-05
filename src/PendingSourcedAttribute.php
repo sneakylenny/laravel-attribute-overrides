@@ -7,12 +7,21 @@ use SneakyLenny\SourcedAttributes\Models\SourcedAttribute;
 
 class PendingSourcedAttribute
 {
+    protected ?int $priorityOverride = null;
+
     public function __construct(
         protected Model $target,
         protected string $attribute,
     ) {
         app(SourcedAttributes::class)->ensurePersisted($this->target);
         app(SourcedAttributes::class)->ensureAttributeName($this->attribute);
+    }
+
+    public function priority(int $priority): static
+    {
+        $this->priorityOverride = $priority;
+
+        return $this;
     }
 
     public function from(Model $origin, ?string $originAttribute = null, array $options = []): SourcedAttribute
@@ -40,7 +49,7 @@ class PendingSourcedAttribute
                 'cast' => $cast,
                 'meta' => $meta,
                 'auto_sync' => $autoSync,
-                'priority' => (int) ($options['priority'] ?? $service->defaultPriority()),
+                'priority' => $this->resolvePriority($options, $service),
             ]
         );
 
@@ -64,8 +73,21 @@ class PendingSourcedAttribute
                 'value' => $value,
                 'cast' => $cast,
                 'meta' => $meta,
-                'priority' => (int) ($options['priority'] ?? $service->defaultPriority()),
+                'priority' => $this->resolvePriority($options, $service),
             ]
         );
+    }
+
+    protected function resolvePriority(array $options, SourcedAttributes $service): int
+    {
+        if (array_key_exists('priority', $options)) {
+            return (int) $options['priority'];
+        }
+
+        if ($this->priorityOverride !== null) {
+            return $this->priorityOverride;
+        }
+
+        return $service->defaultPriority();
     }
 }

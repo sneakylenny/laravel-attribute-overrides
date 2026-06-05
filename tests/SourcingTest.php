@@ -108,6 +108,37 @@ it('updates existing origin source record when recalled', function () {
         ->and($target->fresh()->name)->toBe('Sourced Name');
 });
 
+it('sets priority through fluent builder method for origin sources', function () {
+    $target = User::create([
+        'name' => 'Original Name',
+    ]);
+
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target->sourceAttribute('name')->priority(10)->from($source, 'data.FirstName');
+
+    $record = $target->sourcedAttributes()->where('sourceable_attribute', 'name')->first();
+
+    expect($record->priority)->toBe(10)
+        ->and($target->fresh()->name)->toBe('Sourced Name');
+});
+
+it('sets priority through fluent builder method for literal sources', function () {
+    $target = User::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->priority(10)->as('Controller Value');
+
+    $record = $target->sourcedAttributes()->where('sourceable_attribute', 'name')->first();
+
+    expect($record->priority)->toBe(10)
+        ->and($target->fresh()->name)->toBe('Controller Value');
+});
+
 it('can filter by effective value with whereEffective', function () {
     $baseMatch = User::create(['name' => 'Alpha']);
     $overrideMatch = User::create(['name' => 'Beta']);
