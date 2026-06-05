@@ -133,6 +133,74 @@ it('can eager load sourced attributes for bulk reads', function () {
         ->and($model->name)->toBe('Sourced Name');
 });
 
+it('stores metadata with from meta chaining', function () {
+    $source = TestPerson::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')
+        ->from($source, 'data.FirstName')
+        ->meta(['provider' => 'entra', 'field' => 'displayName']);
+
+    $record = $target->sourcedAttributes()->where('sourceable_attribute', 'name')->first();
+
+    expect($record->meta)->toBe([
+        'provider' => 'entra',
+        'field' => 'displayName',
+    ]);
+});
+
+it('stores metadata through options for literal and origin sources', function () {
+    $source = TestPerson::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->as('Literal', ['meta' => ['type' => 'manual']]);
+    $target->sourceAttribute('label')->from($source, 'data.FirstName', ['meta' => ['type' => 'origin']]);
+
+    $nameRecord = $target->sourcedAttributes()->where('sourceable_attribute', 'name')->first();
+    $labelRecord = $target->sourcedAttributes()->where('sourceable_attribute', 'label')->first();
+
+    expect($nameRecord->meta)->toBe(['type' => 'manual'])
+        ->and($labelRecord->meta)->toBe(['type' => 'origin']);
+});
+
+it('can keep original values while loading sourced attributes for frontend display', function () {
+    $source = TestPerson::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')
+        ->from($source, 'data.FirstName')
+        ->meta(['provider' => 'entra']);
+
+    $model = TestPerson::query()
+        ->whereKey($target->id)
+        ->withSourcedAttributes(['name'])
+        ->first()
+        ->withoutOverrides();
+
+    expect($model->name)->toBe('Original Name')
+        ->and($model->relationLoaded('sourcedAttributes'))->toBeTrue()
+        ->and($model->sourcedAttributes->first()->value)->toBe('Sourced Name')
+        ->and($model->sourcedAttributes->first()->meta)->toBe(['provider' => 'entra']);
+});
+
 it('can skip effective source subquery when disabled for query filtering', function () {
     $baseMatch = TestPerson::create(['name' => 'Alpha']);
     $overrideOnly = TestPerson::create(['name' => 'Beta']);

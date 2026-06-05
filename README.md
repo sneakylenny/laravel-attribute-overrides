@@ -16,6 +16,7 @@ Overrides are persisted in a dedicated table, resolved deterministically (by pri
 - Deterministic winner selection with highest priority first, then newest `created_at`.
 - Re-calling the same source updates the existing source record instead of duplicating it.
 - Per-source cast support using built-in Laravel casts and custom cast classes.
+- Per-source metadata support via `meta` for origin/audit context.
 - Runtime override toggling with `withOverrides()` and `withoutOverrides()`.
 - Global and model-level defaults for whether overrides are active.
 - Virtual sourced attributes (attributes not present on the model table).
@@ -116,6 +117,22 @@ $user->sourceAttribute('name')->as('Preferred Support Name', ['priority' => 10])
 
 // Read effective value (resolved override winner).
 $resolved = $user->fresh()->name; // "Preferred Support Name"
+```
+
+### Attach source metadata
+
+```php
+$user->sourceAttribute('name')
+    ->from($entraUser, 'profile.displayName')
+    ->meta([
+        'provider' => 'entra',
+        'source_field' => 'displayName',
+    ]);
+
+// Also supported via options:
+$user->sourceAttribute('title')->as('VIP', [
+    'meta' => ['provider' => 'manual'],
+]);
 ```
 
 ### Cast sourced values

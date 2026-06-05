@@ -12,6 +12,7 @@ class SourcedAttribute extends Model
     protected $casts = [
         'priority' => 'integer',
         'cast' => 'string',
+        'meta' => 'array',
         'auto_sync' => 'boolean',
     ];
 
@@ -30,5 +31,12 @@ class SourcedAttribute extends Model
     public function origin(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function meta(array $meta): static
+    {
+        $this->update(['meta' => $meta]);
+
+        return $this;
     }
 }

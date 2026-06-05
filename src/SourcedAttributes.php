@@ -142,6 +142,19 @@ class SourcedAttributes
         return $cast;
     }
 
+    public function normalizeMeta(mixed $meta): ?array
+    {
+        if ($meta === null) {
+            return null;
+        }
+
+        if (! is_array($meta)) {
+            throw new InvalidArgumentException('Sourced attribute meta must be an array or null.');
+        }
+
+        return $meta;
+    }
+
     public function ensureValidCast(string $cast): void
     {
         $normalized = strtolower($cast);

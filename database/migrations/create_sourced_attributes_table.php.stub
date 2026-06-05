@@ -19,6 +19,7 @@ return new class extends Migration
 
             $table->text('value')->nullable();
             $table->string('cast')->nullable();
+            $table->json('meta')->nullable();
             $table->boolean('auto_sync')->default(false);
             $table->integer('priority')->default(0);
 

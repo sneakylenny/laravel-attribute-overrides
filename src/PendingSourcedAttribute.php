@@ -18,15 +18,16 @@ class PendingSourcedAttribute
     public function from(Model $origin, string $originAttribute, array $options = []): SourcedAttribute
     {
         app(SourcedAttributes::class)->ensurePersisted($origin);
-        $cast = app(SourcedAttributes::class)->normalizeCast($options['cast'] ?? null);
         $service = app(SourcedAttributes::class);
+        $cast = $service->normalizeCast($options['cast'] ?? null);
+        $meta = $service->normalizeMeta($options['meta'] ?? null);
         $autoSync = (bool) ($options['auto_sync'] ?? $service->defaultAutoSync());
 
         if ($autoSync) {
             $service->markOriginClassHasAutoSync($origin::class);
         }
 
-        return $this->target->sourcedAttributes()->updateOrCreate(
+        $record = $this->target->sourcedAttributes()->updateOrCreate(
             [
                 'sourceable_attribute' => $this->attribute,
                 'origin_type' => $origin::class,
@@ -36,15 +37,20 @@ class PendingSourcedAttribute
             [
                 'value' => data_get($origin, $originAttribute),
                 'cast' => $cast,
+                'meta' => $meta,
                 'auto_sync' => $autoSync,
                 'priority' => (int) ($options['priority'] ?? $service->defaultPriority()),
             ]
         );
+
+        return $record;
     }
 
     public function as(mixed $value, array $options = []): SourcedAttribute
     {
-        $cast = app(SourcedAttributes::class)->normalizeCast($options['cast'] ?? null);
+        $service = app(SourcedAttributes::class);
+        $cast = $service->normalizeCast($options['cast'] ?? null);
+        $meta = $service->normalizeMeta($options['meta'] ?? null);
 
         return $this->target->sourcedAttributes()->updateOrCreate(
             [
@@ -56,7 +62,8 @@ class PendingSourcedAttribute
             [
                 'value' => $value,
                 'cast' => $cast,
-                'priority' => (int) ($options['priority'] ?? app(SourcedAttributes::class)->defaultPriority()),
+                'meta' => $meta,
+                'priority' => (int) ($options['priority'] ?? $service->defaultPriority()),
             ]
         );
     }
