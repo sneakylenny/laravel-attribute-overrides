@@ -109,7 +109,10 @@ $user = User::create([
 	'name' => 'jhon doe',
 ]);
 
-// Source the application user's name from the 3rd-party Entra record.
+// If the origin attribute has the same name, the second argument can be omitted.
+$user->sourceAttribute('name')->from($entraUser);
+
+// Override the default when the origin attribute lives at a different path.
 $user->sourceAttribute('name')->from($entraUser, 'profile.displayName');
 
 // Optionally apply a manual override with higher priority.
@@ -128,6 +131,11 @@ $user->sourceAttribute('name')
         'provider' => 'entra',
         'source_field' => 'displayName',
     ]);
+
+// The second argument still works as an override for the default attribute name.
+$user->sourceAttribute('name')
+    ->from($entraUser, 'profile.displayName')
+    ->meta(['provider' => 'entra']);
 
 // Also supported via options:
 $user->sourceAttribute('title')->as('VIP', [

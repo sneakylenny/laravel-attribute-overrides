@@ -3,7 +3,21 @@
 use Illuminate\Support\Carbon;
 use SneakyLenny\SourcedAttributes\Tests\Support\Models\TestPerson;
 
-it('overrides an attribute from a model source path', function () {
+it('overrides the default origin attribute with a model source path', function () {
+    $source = TestPerson::create([
+        'name' => 'Sourced Name',
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->from($source);
+
+    expect($target->fresh()->name)->toBe('Sourced Name');
+});
+
+it('overrides the default origin attribute with a nested model source path', function () {
     $source = TestPerson::create([
         'name' => 'source',
         'data' => ['FirstName' => 'Sourced Name'],

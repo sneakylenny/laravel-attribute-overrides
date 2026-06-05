@@ -15,10 +15,11 @@ class PendingSourcedAttribute
         app(SourcedAttributes::class)->ensureAttributeName($this->attribute);
     }
 
-    public function from(Model $origin, string $originAttribute, array $options = []): SourcedAttribute
+    public function from(Model $origin, ?string $originAttribute = null, array $options = []): SourcedAttribute
     {
         app(SourcedAttributes::class)->ensurePersisted($origin);
         $service = app(SourcedAttributes::class);
+        $originAttribute ??= $this->attribute;
         $cast = $service->normalizeCast($options['cast'] ?? null);
         $meta = $service->normalizeMeta($options['meta'] ?? null);
         $autoSync = (bool) ($options['auto_sync'] ?? $service->defaultAutoSync());
